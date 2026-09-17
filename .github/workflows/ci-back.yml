@@ -15,6 +15,7 @@ on:
       - 'pom.xml'
       - 'mvnw'
       - 'mvnw.cmd'
+  workflow_dispatch:
 
 jobs:
   test:
