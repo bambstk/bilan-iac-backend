@@ -11,6 +11,8 @@ jobs:
   sca:
     runs-on: ubuntu-latest
     steps:
+
+      - uses: actions/checkout@v7
       - name: Run Trivy (filesystem)
         if: always()
         uses: aquasecurity/trivy-action@v0.36.0
