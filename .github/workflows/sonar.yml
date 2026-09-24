@@ -1,0 +1,39 @@
+name: SonarCloud Analysis
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  sonar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # historique complet pour l'analyse
+      - name: Setup Java21
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Build, test, and analyze coverage
+        run: ./mvnw verify
+        
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v8
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Vérifier le Quality Gate
+        uses: phwt/sonarqube-quality-gate-action@v1
+        with:
+          sonar-project-key: bambstk_azure-quiz-backend
+          sonar-host-url: https://sonarcloud.io
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}

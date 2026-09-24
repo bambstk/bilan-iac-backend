@@ -1,0 +1,48 @@
+name: SCA - Dependencies
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  sca:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Trivy (filesystem)
+        if: always()
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          scanners: 'vuln'
+          severity: 'HIGH,CRITICAL'
+          format: 'table'
+          exit-code: '1'
+
+      - name: Trivy IaC misconfig
+        if: always()
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: 'fs'
+          scanners: 'misconfig'
+          severity: 'HIGH,CRITICAL'
+          format: 'table'
+          exit-code: '1'
+
+      - name: Build Docker image
+        if: always()
+        run: docker build -t quiz-backend:ci-scan .
+
+      - name: Trivy image scan
+        if: always()
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: 'image'
+          image-ref: 'quiz-backend:ci-scan'
+          scanners: 'vuln'
+          severity: 'HIGH,CRITICAL'
+          format: 'table'
+          exit-code: '1'
