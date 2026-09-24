@@ -24,11 +24,12 @@ jobs:
             curl -sf http://localhost:8080/actuator/health > /dev/null && break
             sleep 1
           done
+          curl -sf http://localhost:8080/actuator/health || (echo "Backend a échoué à démarrer" && exit 1)
 
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.15.0
         with:
-          target: 'http://localhost:8080'
+          target: 'http://localhost:8080/actuator/health'
           fail_action: false
           allow_issue_writing: false
 
